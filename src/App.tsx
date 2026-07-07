@@ -17,12 +17,12 @@ import {
 import { TitleBar } from './components/TitleBar';
 import { MenuBar } from './components/MenuBar';
 import { StatusBar } from './components/StatusBar';
-import { GroupBox } from './components/Section';
-import { ToggleGroup } from './components/ToggleGroup';
+import { GroupBox } from './components/GroupBox';
+import { LabeledSelect } from './components/LabeledSelect';
 import { ApiKeyPanel } from './components/ApiKeyPanel';
 import { CodeEditor } from './components/CodeEditor';
 import { VisualizationCanvas, type GenerationStatus } from './components/VisualizationCanvas';
-import { ActionButton } from './components/ActionBar';
+import { ActionButton } from './components/ActionButton';
 import { Icon } from './components/Icon';
 import { buildSystemPrompt, buildUserPrompt } from './lib/systemPrompt';
 import { generateVisualization } from './lib/llm';
@@ -222,10 +222,10 @@ export default function App() {
 
           <GroupBox label="Design Controls" icon="category">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-              <ToggleGroup label="Category" options={CATEGORIES} value={category} onChange={setCategory} />
-              <ToggleGroup label="Palette" options={PALETTES} value={palette} onChange={setPalette} />
-              <ToggleGroup label="Style" options={STYLES} value={style} onChange={setStyle} />
-              <ToggleGroup label="Background" options={BACKGROUNDS} value={background} onChange={setBackground} />
+              <LabeledSelect label="Category" options={CATEGORIES} value={category} onChange={setCategory} />
+              <LabeledSelect label="Palette" options={PALETTES} value={palette} onChange={setPalette} />
+              <LabeledSelect label="Style" options={STYLES} value={style} onChange={setStyle} />
+              <LabeledSelect label="Background" options={BACKGROUNDS} value={background} onChange={setBackground} />
             </div>
           </GroupBox>
         </div>

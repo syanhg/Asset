@@ -24,5 +24,3 @@ export function GroupBox({
     </div>
   );
 }
-
-export const Section = GroupBox;

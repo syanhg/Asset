@@ -1,4 +1,4 @@
-export function ToggleGroup<T extends string>({
+export function LabeledSelect<T extends string>({
   label,
   options,
   value,
