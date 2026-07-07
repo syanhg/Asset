@@ -23,19 +23,19 @@ export const VisualizationCanvas = forwardRef<HTMLCanvasElement, {
   const checker = background === 'Transparent';
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[420px] py-10">
+    <div className="win-sunken win-scroll h-full min-h-0 flex flex-col items-center justify-center p-2">
       <div
-        className="relative max-w-full transition-opacity-fast"
+        className="relative max-w-full max-h-full transition-opacity-fast"
         style={checker ? {
           backgroundImage:
-            'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
+            'linear-gradient(45deg, #d8d8d8 25%, transparent 25%), linear-gradient(-45deg, #d8d8d8 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d8d8d8 75%), linear-gradient(-45deg, transparent 75%, #d8d8d8 75%)',
           backgroundSize: '16px 16px',
           backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
         } : undefined}
       >
-        <canvas ref={ref} className="max-w-full h-auto block" style={{ maxHeight: '640px' }} />
+        <canvas ref={ref} className="max-w-full max-h-full block" style={{ maxHeight: '100%', objectFit: 'contain' }} />
         {!bitmap && (
-          <div className="w-[420px] max-w-full aspect-square flex items-center justify-center border border-black/20 text-[12px] text-black/40">
+          <div className="w-[280px] max-w-full aspect-square flex items-center justify-center text-[12px] text-black/50">
             {status === 'thinking' && 'Querying model…'}
             {status === 'rendering' && 'Executing R…'}
             {status === 'error' && 'No visualization'}
@@ -44,7 +44,7 @@ export const VisualizationCanvas = forwardRef<HTMLCanvasElement, {
         )}
       </div>
       {errorMessage && (
-        <pre className="mt-6 w-full max-w-[640px] border border-black p-3 text-[11px] whitespace-pre-wrap text-black">
+        <pre className="mt-4 w-full max-w-full border border-black bg-[#ffffe0] p-2 text-[11px] whitespace-pre-wrap text-black">
           {errorMessage}
         </pre>
       )}

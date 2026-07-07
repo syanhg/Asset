@@ -1,10 +1,28 @@
 import type { ReactNode } from 'react';
+import { Icon } from './Icon';
 
-export function Section({ label, children }: { label: string; children: ReactNode }) {
+export function GroupBox({
+  label,
+  icon,
+  className = '',
+  bodyClassName = '',
+  children,
+}: {
+  label: string;
+  icon?: string;
+  className?: string;
+  bodyClassName?: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="border-t border-black py-8">
-      <h2 className="text-[11px] uppercase tracking-[0.08em] mb-4">{label}</h2>
-      {children}
+    <div className={`win-groupbox px-3 pt-3 pb-2 ${className}`}>
+      <div className="win-groupbox-label">
+        {icon && <Icon name={icon} size={14} />}
+        {label}
+      </div>
+      <div className={bodyClassName}>{children}</div>
     </div>
   );
 }
+
+export const Section = GroupBox;

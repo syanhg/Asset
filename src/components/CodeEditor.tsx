@@ -2,9 +2,9 @@ import Editor from '@monaco-editor/react';
 
 export function CodeEditor({ code }: { code: string }) {
   return (
-    <div className="border border-black">
+    <div className="win-sunken h-full min-h-0">
       <Editor
-        height="440px"
+        height="100%"
         language="r"
         theme="light"
         value={code || '# Generated R code will appear here after you click Generate.'}
@@ -18,7 +18,7 @@ export function CodeEditor({ code }: { code: string }) {
           scrollBeyondLastLine: false,
           renderLineHighlight: 'none',
           wordWrap: 'on',
-          padding: { top: 16, bottom: 16 },
+          padding: { top: 8, bottom: 8 },
         }}
       />
     </div>

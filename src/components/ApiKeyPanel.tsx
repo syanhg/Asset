@@ -17,26 +17,22 @@ export function ApiKeyPanel({
 }) {
   const current = PROVIDERS.find((p) => p.id === provider)!;
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {PROVIDERS.map((p) => {
-          const active = p.id === provider;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onProvider(p.id)}
-              className={
-                'h-[34px] px-4 border border-black text-[12px] transition-opacity-fast cursor-pointer ' +
-                (active ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white')
-              }
-            >
-              {p.label}
-            </button>
-          );
-        })}
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        {PROVIDERS.map((p) => (
+          <label key={p.id} className="flex items-center gap-1 text-[12px] cursor-default">
+            <input
+              type="radio"
+              name="provider"
+              checked={p.id === provider}
+              onChange={() => onProvider(p.id)}
+              className="cursor-default"
+            />
+            {p.label}
+          </label>
+        ))}
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="password"
           spellCheck={false}
@@ -44,7 +40,7 @@ export function ApiKeyPanel({
           value={apiKey}
           onChange={(e) => onApiKey(e.target.value)}
           placeholder={`${current.label} API key`}
-          className="flex-1 h-[34px] px-3 border border-black bg-white text-[12px] placeholder:text-black/40"
+          className="win-sunken flex-1 h-[22px] px-2 text-[12px]"
         />
         <input
           type="text"
@@ -53,12 +49,11 @@ export function ApiKeyPanel({
           value={model}
           onChange={(e) => onModel(e.target.value)}
           placeholder="model"
-          className="w-full sm:w-[220px] h-[34px] px-3 border border-black bg-white text-[12px] placeholder:text-black/40"
+          className="win-sunken w-full sm:w-[180px] h-[22px] px-2 text-[12px]"
         />
       </div>
-      <p className="text-[11px] text-black/50">
-        Stored only in this browser (localStorage). Sent directly to the provider's API — never to any server of
-        ours.
+      <p className="text-[11px] text-black/60">
+        Stored only in this browser. Sent directly to the provider's API, never to any server of ours.
       </p>
     </div>
   );

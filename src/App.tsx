@@ -16,12 +16,16 @@ import {
   type Resolution,
   type Style,
 } from './types';
-import { Section } from './components/Section';
+import { TitleBar } from './components/TitleBar';
+import { MenuBar } from './components/MenuBar';
+import { StatusBar } from './components/StatusBar';
+import { GroupBox } from './components/Section';
 import { ToggleGroup } from './components/ToggleGroup';
 import { ApiKeyPanel } from './components/ApiKeyPanel';
 import { CodeEditor } from './components/CodeEditor';
 import { VisualizationCanvas, type GenerationStatus } from './components/VisualizationCanvas';
 import { ActionButton } from './components/ActionBar';
+import { Icon } from './components/Icon';
 import { buildSystemPrompt, buildUserPrompt } from './lib/systemPrompt';
 import { generateVisualization } from './lib/llm';
 import { getWebR, runRCode } from './lib/webr';
@@ -41,6 +45,15 @@ function slugify(text: string) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') || 'visualization'
   );
+}
+
+function download(filename: string, content: Blob) {
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function App() {
@@ -63,6 +76,7 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -128,41 +142,100 @@ export default function App() {
     navigator.clipboard.writeText(result.rCode);
   }
 
-  function handleDownload() {
+  function handleDownloadPng() {
     const canvas = canvasRef.current;
     if (!canvas || !bitmap) return;
     canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${slugify(result?.title ?? 'visualization')}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      if (blob) download(`${slugify(result?.title ?? 'visualization')}.png`, blob);
     }, 'image/png');
+  }
+
+  function handleSaveRCode() {
+    if (!result) return;
+    download(`${slugify(result.title)}.R`, new Blob([result.rCode], { type: 'text/plain' }));
+  }
+
+  function handleNew() {
+    setPrompt('');
+    setResult(null);
+    setBitmap(null);
+    setStatus('idle');
+    setErrorMessage(null);
+  }
+
+  function handleClearOutput() {
+    setResult(null);
+    setBitmap(null);
+    setStatus('idle');
+    setErrorMessage(null);
   }
 
   const busy = status === 'thinking' || status === 'rendering';
 
+  const statusText =
+    status === 'thinking'
+      ? `Querying ${PROVIDERS.find((p) => p.id === provider)?.label}…`
+      : status === 'rendering'
+        ? 'Executing R in webR…'
+        : status === 'error'
+          ? (errorMessage ?? 'Error')
+          : status === 'done'
+            ? 'Ready'
+            : 'Ready';
+
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="max-w-[1100px] mx-auto px-6 py-10">
-        <header className="pb-8">
-          <h1 className="text-[15px] font-medium tracking-[-0.01em]">Mathematical Visualizer</h1>
-        </header>
+    <div className="h-screen w-screen flex flex-col win-panel overflow-hidden">
+      <TitleBar />
+      <MenuBar
+        menus={[
+          {
+            label: 'File',
+            items: [
+              { label: 'New Prompt', onClick: handleNew },
+              { label: 'Save R Code As…', onClick: handleSaveRCode, disabled: !result },
+              { separator: true, label: '' },
+              { label: 'Exit', onClick: () => window.close() },
+            ],
+          },
+          {
+            label: 'Edit',
+            items: [
+              { label: 'Copy R Code', onClick: handleCopy, disabled: !result },
+              { label: 'Clear Output', onClick: handleClearOutput, disabled: !result && !bitmap },
+            ],
+          },
+          {
+            label: 'Help',
+            items: [{ label: 'About Mathematical Visualizer', onClick: () => setAboutOpen(true) }],
+          },
+        ]}
+      />
 
-        <Section label="Model Provider">
-          <ApiKeyPanel
-            provider={providerTyped}
-            onProvider={setProvider}
-            apiKey={apiKey}
-            onApiKey={setApiKey}
-            model={model}
-            onModel={setModel}
-          />
-        </Section>
+      <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-hidden">
+        <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 gap-2 items-stretch">
+          <GroupBox label="Model Provider" icon="provider">
+            <ApiKeyPanel
+              provider={providerTyped}
+              onProvider={setProvider}
+              apiKey={apiKey}
+              onApiKey={setApiKey}
+              model={model}
+              onModel={setModel}
+            />
+          </GroupBox>
 
-        <Section label="Prompt">
+          <GroupBox label="Design Controls" icon="category">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+              <ToggleGroup label="Category" options={CATEGORIES} value={category} onChange={setCategory} />
+              <ToggleGroup label="Palette" options={PALETTES} value={palette} onChange={setPalette} />
+              <ToggleGroup label="Style" options={STYLES} value={style} onChange={setStyle} />
+              <ToggleGroup label="Background" options={BACKGROUNDS} value={background} onChange={setBackground} />
+              <ToggleGroup label="Resolution" options={RESOLUTIONS} value={resolution} onChange={setResolution} />
+            </div>
+          </GroupBox>
+        </div>
+
+        <GroupBox label="Prompt" icon="new" className="shrink-0" bodyClassName="flex items-center gap-2">
           <input
             type="text"
             value={prompt}
@@ -171,68 +244,94 @@ export default function App() {
               if (e.key === 'Enter' && !busy) handleGenerate(false);
             }}
             placeholder="a flowing nebula made from chaotic particles"
-            className="w-full h-[38px] px-3 border border-black bg-white text-[13px] placeholder:text-black/40"
+            className="win-sunken flex-1 h-[24px] px-2 text-[13px]"
           />
-        </Section>
-
-        <Section label="Categories">
-          <ToggleGroup options={CATEGORIES} value={category} onChange={setCategory} />
-        </Section>
-
-        <Section label="Palette">
-          <ToggleGroup options={PALETTES} value={palette} onChange={setPalette} />
-        </Section>
-
-        <Section label="Style">
-          <ToggleGroup options={STYLES} value={style} onChange={setStyle} />
-        </Section>
-
-        <Section label="Background">
-          <ToggleGroup options={BACKGROUNDS} value={background} onChange={setBackground} />
-        </Section>
-
-        <Section label="Resolution">
-          <ToggleGroup options={RESOLUTIONS} value={resolution} onChange={setResolution} />
-        </Section>
-
-        <div className="border-t border-black py-8 flex flex-col items-end gap-2">
-          <ActionButton onClick={() => handleGenerate(false)} disabled={busy}>
-            {status === 'thinking' ? 'Querying model…' : status === 'rendering' ? 'Executing R…' : 'Generate'}
+          <ActionButton icon="generate" onClick={() => handleGenerate(false)} disabled={busy}>
+            {busy ? 'Working…' : 'Generate'}
           </ActionButton>
-        </div>
+        </GroupBox>
 
-        <Section label="Generated Visualization">
-          {result && (
-            <div className="mb-6">
-              <div className="text-[13px] font-medium">{result.title}</div>
-              <div className="text-[12px] text-black/60 mt-1">{result.description}</div>
+        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-2">
+          <GroupBox
+            label="Generated Visualization"
+            icon="visualization"
+            className="flex-1 min-h-0 flex flex-col basis-1/2"
+            bodyClassName="flex-1 min-h-0 flex flex-col"
+          >
+            {result && (
+              <div className="shrink-0 mb-1">
+                <div className="text-[12px] font-bold">{result.title}</div>
+                <div className="text-[11px] text-black/70">{result.description}</div>
+              </div>
+            )}
+            <VisualizationCanvas
+              ref={canvasRef}
+              bitmap={bitmap}
+              status={status}
+              errorMessage={status === 'error' ? errorMessage : null}
+              background={background}
+            />
+          </GroupBox>
+
+          <GroupBox
+            label="Generated R Code"
+            icon="rcode"
+            className="flex-1 min-h-0 flex flex-col basis-1/2"
+            bodyClassName="flex-1 min-h-0 flex flex-col gap-2"
+          >
+            <CodeEditor code={result?.rCode ?? ''} />
+            <div className="shrink-0 flex flex-wrap gap-2">
+              <ActionButton icon="copy" onClick={handleCopy} disabled={!result}>
+                Copy
+              </ActionButton>
+              <ActionButton icon="download" onClick={handleDownloadPng} disabled={!bitmap}>
+                Download PNG
+              </ActionButton>
+              <ActionButton icon="remix" onClick={() => handleGenerate(true)} disabled={!result || busy}>
+                Remix
+              </ActionButton>
             </div>
-          )}
-          <VisualizationCanvas
-            ref={canvasRef}
-            bitmap={bitmap}
-            status={status}
-            errorMessage={status === 'error' ? errorMessage : null}
-            background={background}
-          />
-        </Section>
-
-        <Section label="Generated R Code">
-          <CodeEditor code={result?.rCode ?? ''} />
-        </Section>
-
-        <div className="border-t border-black py-8 flex flex-wrap gap-3">
-          <ActionButton onClick={handleCopy} disabled={!result}>
-            Copy
-          </ActionButton>
-          <ActionButton onClick={handleDownload} disabled={!bitmap}>
-            Download PNG
-          </ActionButton>
-          <ActionButton onClick={() => handleGenerate(true)} disabled={!result || busy}>
-            Remix
-          </ActionButton>
+          </GroupBox>
         </div>
       </div>
+
+      <StatusBar left={statusText} right={`${provider} · ${resolution}`} />
+
+      {aboutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div className="win-panel w-[320px]" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="h-[22px] flex items-center justify-between px-2"
+              style={{ background: 'linear-gradient(90deg, var(--title-from), var(--title-to))' }}
+            >
+              <span className="text-white text-[12px] font-bold">About</span>
+              <button
+                type="button"
+                className="win-raised w-[16px] h-[16px] text-[10px] leading-none"
+                onClick={() => setAboutOpen(false)}
+              >
+                &#10005;
+              </button>
+            </div>
+            <div className="p-4 flex gap-3 items-start">
+              <Icon name="about" size={32} />
+              <div className="text-[12px] leading-snug">
+                <p className="font-bold mb-1">Mathematical Visualizer</p>
+                <p>
+                  Describe a visualization, pick a category, palette and style, and GPT / Claude / Gemini writes an R
+                  script that executes locally in your browser via webR — no backend involved.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end p-2 pt-0">
+              <ActionButton onClick={() => setAboutOpen(false)}>OK</ActionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

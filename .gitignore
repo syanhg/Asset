@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Raw third-party icon source pack (only the extracted PNGs in public/icons are used)
+/Icons
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
