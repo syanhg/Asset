@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+:root {
+  --mono: "IBM Plex Mono", "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+* {
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  background: #ffffff;
+  color: #000000;
+}
+
+body {
+  margin: 0;
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+input, textarea, button, select {
+  font-family: var(--mono);
+}
+
+input:focus, textarea:focus, button:focus {
+  outline: none;
+}
+
+.transition-opacity-fast {
+  transition: opacity 150ms linear;
+}
