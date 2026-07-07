@@ -3,17 +3,15 @@ import {
   BACKGROUNDS,
   BACKGROUND_COLORS,
   CATEGORIES,
+  OUTPUT_DIMENSION,
   PALETTES,
   PROVIDERS,
-  RESOLUTIONS,
-  RESOLUTION_DIMENSIONS,
   STYLES,
   type Background,
   type Category,
   type GenerationResult,
   type Palette,
   type Provider,
-  type Resolution,
   type Style,
 } from './types';
 import { TitleBar } from './components/TitleBar';
@@ -70,7 +68,6 @@ export default function App() {
   const [palette, setPalette] = useState<Palette>('Viridis');
   const [style, setStyle] = useState<Style>('Scientific');
   const [background, setBackground] = useState<Background>('White');
-  const [resolution, setResolution] = useState<Resolution>('Preview');
 
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,7 +107,7 @@ export default function App() {
 
     try {
       const systemPrompt = buildSystemPrompt();
-      let userPrompt = buildUserPrompt({ prompt, category, palette, style, background, resolution });
+      let userPrompt = buildUserPrompt({ prompt, category, palette, style, background });
       if (remix) {
         userPrompt +=
           '\n\nThis is a remix request: produce a different variation (different parameters, seed, or composition) of the same theme, not the same script.';
@@ -126,9 +123,8 @@ export default function App() {
       setResult(generated);
 
       setStatus('rendering');
-      const dim = RESOLUTION_DIMENSIONS[resolution];
       const bg = BACKGROUND_COLORS[background];
-      const img = await runRCode(generated.rCode, { width: dim, height: dim, bg });
+      const img = await runRCode(generated.rCode, { width: OUTPUT_DIMENSION, height: OUTPUT_DIMENSION, bg });
       setBitmap(img);
       setStatus('done');
     } catch (err) {
@@ -230,7 +226,6 @@ export default function App() {
               <ToggleGroup label="Palette" options={PALETTES} value={palette} onChange={setPalette} />
               <ToggleGroup label="Style" options={STYLES} value={style} onChange={setStyle} />
               <ToggleGroup label="Background" options={BACKGROUNDS} value={background} onChange={setBackground} />
-              <ToggleGroup label="Resolution" options={RESOLUTIONS} value={resolution} onChange={setResolution} />
             </div>
           </GroupBox>
         </div>
@@ -295,7 +290,19 @@ export default function App() {
         </div>
       </div>
 
-      <StatusBar left={statusText} right={`${provider} · ${resolution}`} />
+      <StatusBar
+        left={statusText}
+        right={
+          <a
+            href="https://x.com/alexyango"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="win-raised h-[16px] px-2 flex items-center whitespace-nowrap text-[11px] no-underline text-black"
+          >
+            @alexyango on X
+          </a>
+        }
+      />
 
       {aboutOpen && (
         <div
@@ -322,7 +329,7 @@ export default function App() {
                 <p className="font-bold mb-1">Mathematical Visualizer</p>
                 <p>
                   Describe a visualization, pick a category, palette and style, and GPT / Claude / Gemini writes an R
-                  script that executes locally in your browser via webR — no backend involved.
+                  script that executes locally in your browser via webR.
                 </p>
               </div>
             </div>

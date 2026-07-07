@@ -20,8 +20,7 @@ export type Style = (typeof STYLES)[number];
 export const BACKGROUNDS = ['White', 'Black', 'Transparent'] as const;
 export type Background = (typeof BACKGROUNDS)[number];
 
-export const RESOLUTIONS = ['Preview', 'HD', '4K'] as const;
-export type Resolution = (typeof RESOLUTIONS)[number];
+export const OUTPUT_DIMENSION = 1000;
 
 export const PROVIDERS: { id: Provider; label: string; defaultModel: string }[] = [
   { id: 'openai', label: 'GPT', defaultModel: 'gpt-5' },
@@ -41,14 +40,7 @@ export interface DesignOptions {
   palette: Palette;
   style: Style;
   background: Background;
-  resolution: Resolution;
 }
-
-export const RESOLUTION_DIMENSIONS: Record<Resolution, number> = {
-  Preview: 700,
-  HD: 1600,
-  '4K': 3200,
-};
 
 export const BACKGROUND_COLORS: Record<Background, string> = {
   White: '#ffffff',

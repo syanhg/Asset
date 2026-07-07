@@ -28,7 +28,7 @@ The following controls are not cosmetic overlays applied after the fact — they
 }
 
 export function buildUserPrompt(opts: DesignOptions): string {
-  const { prompt, category, palette, style, background, resolution } = opts;
+  const { prompt, category, palette, style, background } = opts;
   return `USER PROMPT
 "${prompt}"
 
@@ -37,7 +37,6 @@ DESIGN CONTROLS
 - Palette: ${palette} — approximate this well-known scientific colormap when choosing colors (Inferno: black -> deep red -> orange -> pale yellow. Viridis: dark purple -> blue -> green -> yellow. Plasma: dark blue -> magenta -> orange -> yellow. Turbo: dark blue -> cyan -> green -> yellow -> red. Cividis: dark blue -> grey -> yellow, colorblind-safe).
 - Style: ${style} — Gallery: polished, high contrast, exhibition-ready composition. Dreamlike: soft, hazy, translucent layering, glow via overplotting with alpha. Scientific: precise, instrument-like, restrained, resembling a research figure. Minimal: sparse, few elements, large negative space, thin strokes. Neon: high-saturation strokes on a dark field, glow via repeated semi-transparent overplotting.
 - Background: ${background} — set the plot background accordingly (par(bg=...) and any rect() fill); if Transparent, do not paint an opaque background rectangle at all.
-- Resolution tier: ${resolution} — a higher tier means more detail/resolution is available; scale point counts, grid density, or iteration counts up for HD/4K and down for Preview so render time stays reasonable, but keep the composition equivalent across tiers.
 
 Now produce the JSON object described in the system prompt.`;
 }
