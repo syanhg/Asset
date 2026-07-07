@@ -12,4 +12,4 @@ The UI is a Windows 98-styled desktop app.
 3. The returned R source is shown read-only in a Monaco editor, then executed locally by webR. The resulting plot is captured as an `ImageBitmap` and drawn to a `<canvas>`.
 4. You can copy the R code, save it as a `.R` file, download the rendered PNG, or "Remix" to get a different variation of the same prompt.
 
-There is no server component. Your API key is stored only in `localStorage` and is sent directly to the provider's API (OpenAI / Anthropic / Google).
+Your API key is stored only in `localStorage` and is sent directly to the provider's API (OpenAI / Anthropic / Google).
