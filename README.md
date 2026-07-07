@@ -4,6 +4,7 @@ A single-page, no-backend app that turns a natural-language prompt into computat
 
 The UI is a Windows 98-styled desktop app.
 
+<img width="1494" height="894" alt="image" src="https://github.com/user-attachments/assets/9eface3a-1ac8-4497-8123-25566ee35423" />
 
 ## How it works
 
